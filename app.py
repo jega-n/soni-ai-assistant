@@ -5,6 +5,10 @@ from assistant.config import settings
 from assistant.brain.llm_planner import LLMPlanner
 from assistant.actions.registry import ToolRegistry
 from assistant.actions.tool_executor import ToolExecutor
+from assistant.actions.system.clipboard import ClipboardTool
+from assistant.actions.system.system_info import SystemInfoTool
+from assistant.actions.system.process_manager import ProcessManagerTool
+from assistant.actions.productivity.scheduler import SchedulerTool
 
 from assistant.actions.system.open_app import OpenAppTool
 from assistant.actions.files.file_search import FileSearchTool
@@ -28,6 +32,10 @@ class Assistant:
         registry.register(OpenAppTool())
         registry.register(FileSearchTool())
         registry.register(OpenFileTool())
+        registry.register(ClipboardTool())
+        registry.register(SystemInfoTool())
+        registry.register(ProcessManagerTool())
+        registry.register(SchedulerTool())
 
         executor = ToolExecutor(registry)
         self.planner = LLMPlanner(
