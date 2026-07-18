@@ -1,6 +1,7 @@
-from datetime import datetime
+
 
 from assistant.actions.base_tool import BaseTool, ToolType
+from assistant.database.task_store import TaskStore
 
 
 class SchedulerTool(BaseTool):
@@ -25,9 +26,7 @@ class SchedulerTool(BaseTool):
 
     tool_type = ToolType.DETERMINISTIC
 
-    # Temporary in-memory storage
-    _tasks = []
-    _next_id = 1
+    _store = TaskStore()
 
     def execute(
         self,
@@ -48,24 +47,17 @@ class SchedulerTool(BaseTool):
                         "data": None
                     }
 
-                task = {
-                    "id": SchedulerTool._next_id,
-                    "type": "reminder",
-                    "title": title,
-                    "time": time,
-                    "status": "pending",
-                    "created_at": datetime.now().isoformat(),
-                    "completed": False
-                }
-
-                SchedulerTool._tasks.append(task)
-                SchedulerTool._next_id += 1
+                task_id = self._store.create_task(
+                    task_type="reminder",
+                    title=title,
+                    time=time
+                )
 
                 return {
                     "success": True,
                     "response": "Reminder created successfully.",
                     "data": {
-                        "task_id": task["id"]
+                        "task_id": task_id
                     }
                 }
 
@@ -78,24 +70,16 @@ class SchedulerTool(BaseTool):
                         "data": None
                     }
 
-                task = {
-                    "id": SchedulerTool._next_id,
-                    "type": "todo",
-                    "title": title,
-                    "time": None,
-                    "status": "pending",
-                    "created_at": datetime.now().isoformat(),
-                    "completed": False
-                }
-
-                SchedulerTool._tasks.append(task)
-                SchedulerTool._next_id += 1
+                task_id = self._store.create_task(
+                    task_type="todo",
+                    title=title
+                )
 
                 return {
                     "success": True,
                     "response": "Todo created successfully.",
                     "data": {
-                        "task_id": task["id"]
+                        "task_id": task_id
                     }
                 }
 
@@ -105,7 +89,7 @@ class SchedulerTool(BaseTool):
                     "success": True,
                     "response": None,
                     "data": {
-                        "tasks": SchedulerTool._tasks
+                        "tasks": self._store.list_tasks()
                     }
                 }
 
@@ -118,24 +102,22 @@ class SchedulerTool(BaseTool):
                         "data": None
                     }
 
-                for task in SchedulerTool._tasks:
+                deleted = self._store.delete_task(task_id)
 
-                    if task["id"] == task_id:
+                if not deleted:
 
-                        SchedulerTool._tasks.remove(task)
-
-                        return {
-                            "success": True,
-                            "response": "Task deleted successfully.",
-                            "data": {
-                                "task_id": task_id
-                            }
-                        }
+                    return {
+                        "success": False,
+                        "response": "Task not found.",
+                        "data": None
+                    }
 
                 return {
-                    "success": False,
-                    "response": "Task not found.",
-                    "data": None
+                    "success": True,
+                    "response": "Task deleted successfully.",
+                    "data": {
+                        "task_id": task_id
+                    }
                 }
 
             else:

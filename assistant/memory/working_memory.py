@@ -1,21 +1,29 @@
-from collections import deque
+from assistant.database.conversation_store import ConversationStore
+
 
 class WorkingMemory:
 
     def __init__(self, limit=10):
-        self.messages = deque(maxlen=limit)
+
+        self.limit = limit
+        self.store = ConversationStore()
+
 
     def add(self, role, content):
 
-        self.messages.append(
-            {
-                "role": role,
-                "content": content
-            }
+        self.store.save_message(
+            role,
+            content
         )
 
+
     def get(self):
-        return list(self.messages)
+
+        return self.store.get_recent_messages(
+            self.limit
+        )
+
 
     def clear(self):
-        self.messages.clear()
+
+        self.store.clear()
