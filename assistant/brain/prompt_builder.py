@@ -1,0 +1,54 @@
+from assistant.brain.prompts import SYSTEM_PROMPT
+import json
+
+
+class PromptBuilder:
+
+    def __init__(self, memory_manager):
+        self.memory = memory_manager
+
+    def build(
+        self,
+        user_input: str,
+        tool_data=None
+    ):
+
+        messages = [
+            {
+                "role": "system",
+                "content": SYSTEM_PROMPT
+            }
+        ]
+
+        # Working Memory
+        messages.extend(
+            self.memory.working.get()
+        )
+
+        # Semantic Memory
+        for key, value in self.memory.semantic.knowledge.items():
+
+            messages.append({
+                "role": "system",
+                "content": f"{key}: {value}"
+            })
+
+        # Tool Context
+        if tool_data is not None:
+
+            messages.append({
+                "role": "system",
+                "content": (
+                    "The following structured data was produced by a trusted Python tool.\n"
+                    "Treat this data as factual.\n\n"
+                    f"{json.dumps(tool_data, indent=2, ensure_ascii=False)}"
+                )
+            })
+
+        # Current User Message
+        messages.append({
+            "role": "user",
+            "content": user_input
+        })
+
+        return messages

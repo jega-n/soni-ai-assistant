@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual Environment
+soni/
+venv/
+.venv/
+
+# Piper runtime
+assets/piper/
+
+# Voice models
+assets/voices/
+
+# IDE
+.vscode/
+.idea/
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite3
+
+# Environment
+.env
+
+# Temporary files
+*.tmp
+*.wav
+*.mp3
+
+# Playwright
+playwright-report/
+test-results/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Python cache
+.pytest_cache/
+
+# Build
+dist/
+build/
+
+# Local model cache (if any)
+models/
+
+# Personal notes
+*.bak
+Bendingss!.txt
+test_stt.py
+test.wav
