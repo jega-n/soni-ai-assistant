@@ -44,7 +44,8 @@ class SchedulerTool(BaseTool):
                     return {
                         "success": False,
                         "response": "Reminder title is required.",
-                        "data": None
+                        "data": None,
+                        "llm": False
                     }
 
                 task_id = self._store.create_task(
@@ -58,7 +59,8 @@ class SchedulerTool(BaseTool):
                     "response": "Reminder created successfully.",
                     "data": {
                         "task_id": task_id
-                    }
+                    },
+                    "llm": False
                 }
 
             elif action == "create_todo":
@@ -67,7 +69,8 @@ class SchedulerTool(BaseTool):
                     return {
                         "success": False,
                         "response": "Todo title is required.",
-                        "data": None
+                        "data": None,
+                        "llm": False
                     }
 
                 task_id = self._store.create_task(
@@ -80,7 +83,8 @@ class SchedulerTool(BaseTool):
                     "response": "Todo created successfully.",
                     "data": {
                         "task_id": task_id
-                    }
+                    },
+                    "llm": False
                 }
 
             elif action == "list":
@@ -90,7 +94,8 @@ class SchedulerTool(BaseTool):
                     "response": None,
                     "data": {
                         "tasks": self._store.list_tasks()
-                    }
+                    },
+                    "llm": False
                 }
 
             elif action == "delete":
@@ -99,7 +104,8 @@ class SchedulerTool(BaseTool):
                     return {
                         "success": False,
                         "response": "Task ID is required.",
-                        "data": None
+                        "data": None,
+                        "llm": False
                     }
 
                 deleted = self._store.delete_task(task_id)
@@ -109,7 +115,8 @@ class SchedulerTool(BaseTool):
                     return {
                         "success": False,
                         "response": "Task not found.",
-                        "data": None
+                        "data": None,
+                        "llm": False
                     }
 
                 return {
@@ -117,7 +124,8 @@ class SchedulerTool(BaseTool):
                     "response": "Task deleted successfully.",
                     "data": {
                         "task_id": task_id
-                    }
+                    },
+                    "llm": False
                 }
 
             else:
@@ -125,7 +133,8 @@ class SchedulerTool(BaseTool):
                 return {
                     "success": False,
                     "response": f"Unsupported action: {action}",
-                    "data": None
+                    "data": None,
+                    "llm": False
                 }
 
         except Exception as e:
@@ -133,5 +142,6 @@ class SchedulerTool(BaseTool):
             return {
                 "success": False,
                 "response": str(e),
-                "data": None
+                "data": None,
+                "llm": False
             }

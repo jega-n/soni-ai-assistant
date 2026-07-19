@@ -38,7 +38,8 @@ class OpenAppTool(BaseTool):
                 "response": f"Opened {application}.",
                 "data": {
                     "application": application
-                }
+                },
+                "llm": False
             }
 
         if os.path.exists(application):
@@ -50,11 +51,13 @@ class OpenAppTool(BaseTool):
                 "response": "Opened application.",
                 "data": {
                     "application": application
-                }
+                }, 
+                "llm": False
             }
 
         return {
             "success": False,
             "response": None,
-            "data": None
+            "data": None,
+            "llm": False
         }

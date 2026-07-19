@@ -35,6 +35,7 @@ class OpenFileTool(BaseTool):
                 "success": False,
                 "response": "File not found.",
                 "data": None,
+                "llm": False
             }
 
         try:
@@ -46,7 +47,8 @@ class OpenFileTool(BaseTool):
                 "response": "Opened the file.",
                 "data": {
                     "path": path
-                }
+                },
+                "llm": False
             }
 
         except Exception:
@@ -55,4 +57,5 @@ class OpenFileTool(BaseTool):
                 "success": False,
                 "response": "Unable to open the file.",
                 "data": None,
+                "llm": False
             }

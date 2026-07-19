@@ -73,30 +73,29 @@ class ExecutionEngine:
         step: ExecutionStep,
         result
     ):
-
+        # Tool failed
         if not result["success"]:
 
             fallback = self._try_fallback(step)
 
             if fallback is not None:
-
                 self.session.set("last_response", fallback)
                 return fallback
 
             response = result["response"] or "Operation failed."
+            self.session.set("last_response", response)
+            return response
+
+        # Tool does NOT require LLM
+        if not result.get("llm", False):
+
+            response = result["response"] or "Operation completed."
 
             self.session.set("last_response", response)
 
             return response
 
-        # Tool already produced a final response
-        if result["response"] is not None:
-
-            self.session.set("last_response", result["response"])
-
-            return result["response"]
-
-        # Tool returned structured data -> generate LLM
+        # Tool requires LLM
         prompt = self.prompt_builder.build(
             user_input=user_input,
             tool_data=result["data"],

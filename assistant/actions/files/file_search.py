@@ -138,6 +138,7 @@ class FileSearchTool(BaseTool):
                 "success": False,
                 "response": "I couldn't find that file.",
                 "data": None,
+                "llm": False
             }
 
         # Best match first
@@ -155,4 +156,5 @@ class FileSearchTool(BaseTool):
             "success": True,
             "response": None,
             "data": best,
+            "llm": False
         }

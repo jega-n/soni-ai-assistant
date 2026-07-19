@@ -57,7 +57,8 @@ class ProcessManagerTool(BaseTool):
                     "response": None,
                     "data": {
                         "processes": processes
-                    }
+                    },
+                    "llm": False
                 }
 
 
@@ -73,7 +74,8 @@ class ProcessManagerTool(BaseTool):
                         "response": f"Process {pid} terminated.",
                         "data": {
                             "pid": pid
-                        }
+                        },
+                        "llm": False
                     }
 
 
@@ -112,7 +114,8 @@ class ProcessManagerTool(BaseTool):
                         return {
                             "success": False,
                             "response": f"No running process named '{name}' found.",
-                            "data": None
+                            "data": None,
+                            "llm": False
                         }
 
                     return {
@@ -120,21 +123,24 @@ class ProcessManagerTool(BaseTool):
                         "response": f"Terminated {len(terminated)} process(es) named '{name}'.",
                         "data": {
                             "terminated": terminated
-                        }
+                        },
+                        "llm": False
                     }
 
 
                 return {
                     "success": False,
                     "response": "Provide either a process name or PID.",
-                    "data": None
+                    "data": None,
+                    "llm": False
                 }
 
 
             return {
                 "success": False,
                 "response": f"Unsupported action: {action}",
-                "data": None
+                "data": None,
+                "llm": False
             }
 
         except psutil.NoSuchProcess:
@@ -142,7 +148,8 @@ class ProcessManagerTool(BaseTool):
             return {
                 "success": False,
                 "response": "Process not found.",
-                "data": None
+                "data": None,
+                "llm": False
             }
 
         except psutil.AccessDenied:
@@ -150,7 +157,8 @@ class ProcessManagerTool(BaseTool):
             return {
                 "success": False,
                 "response": "Permission denied while accessing the process.",
-                "data": None
+                "data": None,
+                "llm": False
             }
 
         except Exception as e:
@@ -158,5 +166,6 @@ class ProcessManagerTool(BaseTool):
             return {
                 "success": False,
                 "response": str(e),
-                "data": None
+                "data": None,
+                "llm": False
             }

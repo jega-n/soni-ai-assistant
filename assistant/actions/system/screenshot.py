@@ -38,5 +38,6 @@ class ScreenshotTool(BaseTool):
             "response": f"Screenshot saved to {path}",
             "data": {
                 "path": str(path)
-            }
+            },
+            "llm": False
         }

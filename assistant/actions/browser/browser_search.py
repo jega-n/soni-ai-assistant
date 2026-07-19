@@ -77,5 +77,6 @@ class BrowserSearchTool(BaseTool):
             "data": {
                 "query": query,
                 "results": results
-            }
+            },
+            "llm": True
         }

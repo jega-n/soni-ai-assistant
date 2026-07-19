@@ -27,14 +27,16 @@ class FileReaderTool(BaseTool):
             return {
                 "success": False,
                 "response": "File not found.",
-                "data": None
+                "data": None,
+                "llm": True
             }
 
         if file.suffix.lower() not in SUPPORTED_TEXT_FILES:
             return {
                 "success": False,
                 "response": f"{file.suffix} is not supported yet.",
-                "data": None
+                "data": None,
+                "llm": True
             }
 
         try:
@@ -51,7 +53,8 @@ class FileReaderTool(BaseTool):
                     "name": file.name,
                     "path": str(file),
                     "content": content
-                }
+                },
+                "llm": True
             }
 
         except Exception as e:
@@ -59,5 +62,6 @@ class FileReaderTool(BaseTool):
             return {
                 "success": False,
                 "response": str(e),
-                "data": None
+                "data": None,
+                "llm": True
             }

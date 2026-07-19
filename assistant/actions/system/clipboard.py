@@ -35,7 +35,8 @@ class ClipboardTool(BaseTool):
                     "response": None,
                     "data": {
                         "clipboard_text": content
-                    }
+                    },
+                    "llm": False
                 }
 
 
@@ -45,7 +46,8 @@ class ClipboardTool(BaseTool):
                     return {
                         "success": False,
                         "response": "No text provided to copy.",
-                        "data": None
+                        "data": None,
+                        "llm": False
                     }
 
 
@@ -56,7 +58,8 @@ class ClipboardTool(BaseTool):
                     "response": "Text copied to clipboard.",
                     "data": {
                         "copied_text": text
-                    }
+                    },
+                    "llm": False
                 }
 
 
@@ -65,7 +68,8 @@ class ClipboardTool(BaseTool):
                 return {
                     "success": False,
                     "response": f"Unsupported clipboard action: {action}",
-                    "data": None
+                    "data": None,
+                    "llm": False
                 }
 
 
@@ -74,5 +78,6 @@ class ClipboardTool(BaseTool):
             return {
                 "success": False,
                 "response": f"Clipboard operation failed: {str(e)}",
-                "data": None
+                "data": None,
+                "llm": False
             }

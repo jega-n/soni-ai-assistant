@@ -64,7 +64,8 @@ class SystemInfoTool(BaseTool):
                     return {
                         "success": False,
                         "response": "Battery information is not available.",
-                        "data": None
+                        "data": None,
+                        "llm": False
                     }
 
                 data = {
@@ -108,13 +109,15 @@ class SystemInfoTool(BaseTool):
                 return {
                     "success": False,
                     "response": f"Unsupported metric: {metric}",
-                    "data": None
+                    "data": None,
+                    "llm": False
                 }
 
             return {
                 "success": True,
                 "response": None,
-                "data": data
+                "data": data,
+                "llm": False
             }
 
         except Exception as e:
@@ -122,5 +125,6 @@ class SystemInfoTool(BaseTool):
             return {
                 "success": False,
                 "response": f"Failed to retrieve system information: {str(e)}",
-                "data": None
+                "data": None,
+                "llm": False
             }
