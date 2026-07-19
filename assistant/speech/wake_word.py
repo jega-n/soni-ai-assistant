@@ -52,9 +52,6 @@ class WakeWordDetector:
 
             score = float(prediction.get(WAKE_WORD, 0))
 
-            if score > 0.05:
-                print(f"Wake score: {score:.3f}")
-
             if score >= 0.1:
                 count += 1
             else:

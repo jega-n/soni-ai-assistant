@@ -17,6 +17,7 @@ class ToolExecutor:
                 "tool": tool_name,
                 "tool_type": None,
                 "result": None,
+                "data": None,
                 "response": None,
                 "error": "Tool not found."
             }
@@ -29,6 +30,7 @@ class ToolExecutor:
                 "success": result["success"],
                 "tool": tool_name,
                 "tool_type": tool.tool_type,
+                "data": result["data"],
                 "result": result,
                 "response": result["response"],
                 "error": None
@@ -43,6 +45,7 @@ class ToolExecutor:
                 "tool": tool_name,
                 "tool_type": tool.tool_type,
                 "result": None,
+                "data": None,
                 "response": None,
                 "error": str(e)
             }

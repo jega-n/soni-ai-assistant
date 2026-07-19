@@ -36,3 +36,36 @@ class MemoryManager:
 
     def clear_context(self):
         self.session_context.clear()
+
+    def add_interaction(self, user: str, assistant: str):
+
+        # Save conversation for prompt history
+        self.working.add("user", user)
+        self.working.add("assistant", assistant)
+
+        # Save an episode
+        self.episodic.add({
+            "user": user,
+            "assistant": assistant
+        })
+
+    def get_recent_messages(self):
+        return self.working.get()
+
+    def get_recent_events(self):
+        return self.episodic.retrieve()
+
+    def remember(self, key, value):
+        self.semantic.remember(key, value)
+
+    def recall(self, key):
+        return self.semantic.recall(key)
+
+    def forget(self, key):
+        return self.semantic.forget(key)
+
+    def register_skill(self, name, tool):
+        self.procedural.register(name, tool)
+
+    def get_skill(self, name):
+        return self.procedural.get(name)

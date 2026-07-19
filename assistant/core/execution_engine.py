@@ -3,8 +3,6 @@ from assistant.brain.execution_plan import ExecutionPlan, ExecutionStep
 from assistant.brain.llm import LLM
 from assistant.brain.prompt_builder import PromptBuilder
 from assistant.memory.memory_manager import MemoryManager
-from assistant.memory.session_context import SessionContext
-
 
 class ExecutionEngine:
 
@@ -12,9 +10,8 @@ class ExecutionEngine:
 
         self.executor = tool_executor
         self.llm = LLM()
-        self.session = SessionContext()
-
         self.memory = MemoryManager()
+        self.session = self.memory.session_context
         self.prompt_builder = PromptBuilder(self.memory)
 
     # --------------------------------------------------
@@ -30,7 +27,7 @@ class ExecutionEngine:
                 session_context=self.session.all()
             )
 
-            response = self.llm.ask(prompt)
+            response = self.llm.generate(prompt)
 
             self.memory.add_interaction(
                 user=user_input,
@@ -99,14 +96,14 @@ class ExecutionEngine:
 
             return result["response"]
 
-        # Tool returned structured data -> ask LLM
+        # Tool returned structured data -> generate LLM
         prompt = self.prompt_builder.build(
             user_input=user_input,
             tool_data=result["data"],
             session_context=self.session.all()
         )
 
-        response = self.llm.ask(prompt)
+        response = self.llm.generate(prompt)
 
         self.session.set("last_response", response)
 

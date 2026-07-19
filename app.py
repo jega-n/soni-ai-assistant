@@ -1,3 +1,5 @@
+import traceback
+
 from assistant.utils.logger import logger
 from assistant.config import settings
 
@@ -77,15 +79,10 @@ class Assistant:
                 if user_input.lower() in ("exit", "quit"):
                     break
 
-                plan = self.planner.plan(user_input)
-                print("PLAN:", plan)
-
                 response = self.engine.execute(
                     user_input=user_input,
-                    plan=plan
+                    plan=self.planner.plan(user_input)
                 )
-
-                print("RESPONSE:", response)
 
                 print(f"Soni: {response}")
 
@@ -101,13 +98,12 @@ def main():
         assistant.run()
 
     except KeyboardInterrupt:
-
         logger.warning("Interrupted by user.")
 
-    except Exception as e:
 
+    except Exception as e:
         logger.exception(e)
-        print(e)
+        traceback.print_exc()
 
     finally:
 
