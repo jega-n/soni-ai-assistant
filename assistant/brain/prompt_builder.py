@@ -28,11 +28,13 @@ class PromptBuilder:
         )
 
         # Semantic Memory
-        for key, value in self.memory.semantic.knowledge.items():
+        facts = self.memory.semantic.store.list_facts()
+
+        for fact in facts:
 
             messages.append({
                 "role": "system",
-                "content": f"{key}: {value}"
+                "content": f"{fact['key']}: {fact['value']}"
             })
 
         # Session Context

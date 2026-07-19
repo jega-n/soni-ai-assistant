@@ -1,4 +1,5 @@
 from assistant.actions.tool_executor import ToolExecutor
+from assistant.brain.execution_plan import ExecutionPlan, ExecutionStep
 from assistant.brain.llm import LLM
 from assistant.brain.prompt_builder import PromptBuilder
 from assistant.memory.memory_manager import MemoryManager
@@ -18,15 +19,16 @@ class ExecutionEngine:
 
     # --------------------------------------------------
 
-    def execute(self, user_input: str, plan: dict):
+    def execute(self, user_input: str, plan: ExecutionPlan):
 
-        if plan["tool"] is None:
+        # No tool selected -> chat directly with LLM
+        if not plan.steps:
 
             prompt = self.prompt_builder.build(
-            user_input=user_input,
-            tool_data=None,
-            session_context=self.session.all()
-        )
+                user_input=user_input,
+                tool_data=None,
+                session_context=self.session.all()
+            )
 
             response = self.llm.ask(prompt)
 
@@ -37,22 +39,27 @@ class ExecutionEngine:
 
             return response
 
-        result = self.executor.execute(
-            plan["tool"],
-            **plan["parameters"]
-        )
+        response = None
 
-        self._update_session(
-            user_input=user_input,
-            plan=plan,
-            result=result
-        )
+        # Execute each step in order
+        for step in plan.steps:
 
-        response = self._handle_tool_result(
-            user_input,
-            plan,
-            result
-        )
+            result = self.executor.execute(
+                step.tool,
+                **step.parameters
+            )
+
+            self._update_session(
+                user_input=user_input,
+                step=step,
+                result=result
+            )
+
+            response = self._handle_tool_result(
+                user_input=user_input,
+                step=step,
+                result=result
+            )
 
         self.memory.add_interaction(
             user=user_input,
@@ -66,13 +73,13 @@ class ExecutionEngine:
     def _handle_tool_result(
         self,
         user_input,
-        plan,
+        step: ExecutionStep,
         result
     ):
 
         if not result["success"]:
 
-            fallback = self._try_fallback(plan)
+            fallback = self._try_fallback(step)
 
             if fallback is not None:
 
@@ -107,14 +114,14 @@ class ExecutionEngine:
 
     # --------------------------------------------------
 
-    def _try_fallback(self, plan):
+    def _try_fallback(self, step: ExecutionStep):
 
-        if plan["tool"] != "open_app":
+        if step.tool != "open_app":
             return None
 
         search = self.executor.execute(
             "file_search",
-            query=plan["parameters"]["application"]
+            query=step.parameters["application"]
         )
 
         if not search["success"]:
@@ -136,15 +143,22 @@ class ExecutionEngine:
         )
 
         return opened["response"]
-    
-    def _update_session(self, user_input, plan, result):
+
+    # --------------------------------------------------
+
+    def _update_session(
+        self,
+        user_input,
+        step: ExecutionStep,
+        result
+    ):
 
         if not result["success"]:
             return
 
         self.session.set("last_user_input", user_input)
-        self.session.set("last_tool", plan["tool"])
-        self.session.set("last_parameters", plan["parameters"])
+        self.session.set("last_tool", step.tool)
+        self.session.set("last_parameters", step.parameters)
 
         if result["data"] is not None:
             self.session.set("last_data", result["data"])

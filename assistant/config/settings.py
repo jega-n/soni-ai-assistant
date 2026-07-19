@@ -33,7 +33,7 @@ VOICE_VOLUME = 1.0        # 0.0 to 1.0
 
 MIC_TIMEOUT = 5
 
-PHRASE_TIME_LIMIT = 10
+PHRASE_TIME_LIMIT = 5
 
 # ==========================
 # Database
@@ -149,7 +149,7 @@ SUPPORTED_TEXT_FILES = {
 # wake word detection configuration
 # ==========================
 
-WAKE_WORD_THRESHOLD = 0.3
+WAKE_WORD_THRESHOLD = 0.1
 WAKE_WORD_SAMPLE_RATE = 16000
 WAKE_WORD_BLOCK_SIZE = 1280
 

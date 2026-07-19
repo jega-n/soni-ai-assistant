@@ -26,7 +26,7 @@ class LLM:
 
         messages = self.prompt_builder.build(
             user_input=user_input,
-            tool_result=tool_result
+            tool_data=tool_result
         )
 
         logger.info("Prompt built successfully.")

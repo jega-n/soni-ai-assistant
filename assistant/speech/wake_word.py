@@ -41,7 +41,7 @@ class WakeWordDetector:
     def listen(self):
 
         print("Listening for wake word...")
-
+        count = 0
         while True:
             audio = np.frombuffer(
                 self.audio_queue.get(),
@@ -55,7 +55,12 @@ class WakeWordDetector:
             if score > 0.05:
                 print(f"Wake score: {score:.3f}")
 
-            if score >= self.THRESHOLD:
+            if score >= 0.1:
+                count += 1
+            else:
+                count = 0
+
+            if count >= 2:
                 print("Wake word detected!")
                 return True
 

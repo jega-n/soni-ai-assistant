@@ -4,6 +4,7 @@ from assistant.config import settings
 from assistant.brain.llm_planner import LLMPlanner
 from assistant.actions.registry import ToolRegistry
 from assistant.actions.tool_executor import ToolExecutor
+
 from assistant.actions.system.clipboard import ClipboardTool
 from assistant.actions.system.system_info import SystemInfoTool
 from assistant.actions.system.process_manager import ProcessManagerTool
@@ -76,10 +77,15 @@ class Assistant:
                 if user_input.lower() in ("exit", "quit"):
                     break
 
+                plan = self.planner.plan(user_input)
+                print("PLAN:", plan)
+
                 response = self.engine.execute(
                     user_input=user_input,
-                    plan=self.planner.plan(user_input)
+                    plan=plan
                 )
+
+                print("RESPONSE:", response)
 
                 print(f"Soni: {response}")
 
