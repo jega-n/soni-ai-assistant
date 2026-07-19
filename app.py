@@ -1,4 +1,3 @@
-from actions.system.screenshot import ScreenshotTool
 from assistant.utils.logger import logger
 from assistant.config import settings
 
@@ -9,13 +8,14 @@ from assistant.actions.system.clipboard import ClipboardTool
 from assistant.actions.system.system_info import SystemInfoTool
 from assistant.actions.system.process_manager import ProcessManagerTool
 from assistant.actions.productivity.scheduler import SchedulerTool
-
+from assistant.actions.system.screenshot import ScreenshotTool
 from assistant.actions.system.open_app import OpenAppTool
 from assistant.actions.files.file_search import FileSearchTool
 from assistant.actions.files.open_file import OpenFileTool
 
 from assistant.core.execution_engine import ExecutionEngine
-from brain.llm import LLM
+from assistant.brain.llm import LLM
+from assistant.speech.voice_loop import VoiceLoop
 
 
 class Assistant:
@@ -26,18 +26,19 @@ class Assistant:
         self.version = settings.VERSION
 
         self.llm = LLM()
-        registry = ToolRegistry()
+        self.registry = ToolRegistry()
+        self.voice = VoiceLoop()
 
-        registry.register(ScreenshotTool())
-        registry.register(OpenAppTool())
-        registry.register(FileSearchTool())
-        registry.register(OpenFileTool())
-        registry.register(ClipboardTool())
-        registry.register(SystemInfoTool())
-        registry.register(ProcessManagerTool())
-        registry.register(SchedulerTool())
+        self.registry.register(ScreenshotTool())
+        self.registry.register(OpenAppTool())
+        self.registry.register(FileSearchTool())
+        self.registry.register(OpenFileTool())
+        self.registry.register(ClipboardTool())
+        self.registry.register(SystemInfoTool())
+        self.registry.register(ProcessManagerTool())
+        self.registry.register(SchedulerTool())
 
-        executor = ToolExecutor(registry)
+        executor = ToolExecutor(self.registry)
         self.planner = LLMPlanner(
             self.llm,
             self.registry
@@ -55,48 +56,34 @@ class Assistant:
 
     def shutdown(self):
 
+        if hasattr(self, "voice"):
+            self.voice.wake.close()
+
         logger.info("Assistant shutting down.")
         print("Goodbye!")
 
     def run(self):
 
-        while True:
+            while True:
 
-            user_input = input("\nYou: ").strip()
+                user_input = self.voice.wait_for_command()
 
-            if not user_input:
-                continue
-
-            if user_input.lower() in ("exit", "quit"):
-                break
-
-            plan = self.planner.plan(user_input)
-
-            if plan["tool"]:
-
-                tool_result = self.executor.execute(
-                    plan["tool"],
-                    **plan["parameters"]
-                )
-
-                if tool_result["response"]:
-                    print(f"Soni: {tool_result['response']}")
+                if not user_input:
                     continue
 
-                prompt = self.prompt_builder.build(
+                print(f"\nYou: {user_input}")
+
+                if user_input.lower() in ("exit", "quit"):
+                    break
+
+                response = self.engine.execute(
                     user_input=user_input,
-                    tool_data=tool_result["data"]
+                    plan=self.planner.plan(user_input)
                 )
 
-            else:
+                print(f"Soni: {response}")
 
-                prompt = self.prompt_builder.build(
-                    user_input=user_input
-                )
-
-            response = self.llm.generate(prompt)
-
-            print(f"Soni: {response}")
+                self.voice.speak(response)
 
 def main():
 

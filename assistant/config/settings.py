@@ -144,3 +144,13 @@ SUPPORTED_TEXT_FILES = {
     ".ini",
     ".log"
 }
+
+# ==========================
+# wake word detection configuration
+# ==========================
+
+WAKE_WORD_THRESHOLD = 0.3
+WAKE_WORD_SAMPLE_RATE = 16000
+WAKE_WORD_BLOCK_SIZE = 1280
+
+WAKE_WORD = "hey_jarvis"

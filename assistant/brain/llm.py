@@ -15,7 +15,7 @@ class LLM:
 
         self.prompt_builder = PromptBuilder(self.memory)
 
-    def ask(self, user_input: str, tool_result=None):
+    def generate(self, user_input: str, tool_result=None):
 
         self.memory.working.add(
             "user",

@@ -2,6 +2,7 @@ from assistant.actions.tool_executor import ToolExecutor
 from assistant.brain.llm import LLM
 from assistant.brain.prompt_builder import PromptBuilder
 from assistant.memory.memory_manager import MemoryManager
+from assistant.memory.session_context import SessionContext
 
 
 class ExecutionEngine:
@@ -10,9 +11,10 @@ class ExecutionEngine:
 
         self.executor = tool_executor
         self.llm = LLM()
+        self.session = SessionContext()
 
         self.memory = MemoryManager()
-        self.prompt_builder = PromptBuilder()
+        self.prompt_builder = PromptBuilder(self.memory)
 
     # --------------------------------------------------
 
@@ -21,10 +23,10 @@ class ExecutionEngine:
         if plan["tool"] is None:
 
             prompt = self.prompt_builder.build(
-                user_input=user_input,
-                memory=self.memory,
-                tool_data=None
-            )
+            user_input=user_input,
+            tool_data=None,
+            session_context=self.session.all()
+        )
 
             response = self.llm.ask(prompt)
 
@@ -38,6 +40,12 @@ class ExecutionEngine:
         result = self.executor.execute(
             plan["tool"],
             **plan["parameters"]
+        )
+
+        self._update_session(
+            user_input=user_input,
+            plan=plan,
+            result=result
         )
 
         response = self._handle_tool_result(
@@ -67,20 +75,35 @@ class ExecutionEngine:
             fallback = self._try_fallback(plan)
 
             if fallback is not None:
+
+                self.session.set("last_response", fallback)
                 return fallback
 
-            return result["response"] or "Operation failed."
+            response = result["response"] or "Operation failed."
 
+            self.session.set("last_response", response)
+
+            return response
+
+        # Tool already produced a final response
         if result["response"] is not None:
+
+            self.session.set("last_response", result["response"])
+
             return result["response"]
 
+        # Tool returned structured data -> ask LLM
         prompt = self.prompt_builder.build(
             user_input=user_input,
-            memory=self.memory,
-            tool_data=result["result"]["data"]
+            tool_data=result["data"],
+            session_context=self.session.all()
         )
 
-        return self.llm.ask(prompt)
+        response = self.llm.ask(prompt)
+
+        self.session.set("last_response", response)
+
+        return response
 
     # --------------------------------------------------
 
@@ -113,3 +136,15 @@ class ExecutionEngine:
         )
 
         return opened["response"]
+    
+    def _update_session(self, user_input, plan, result):
+
+        if not result["success"]:
+            return
+
+        self.session.set("last_user_input", user_input)
+        self.session.set("last_tool", plan["tool"])
+        self.session.set("last_parameters", plan["parameters"])
+
+        if result["data"] is not None:
+            self.session.set("last_data", result["data"])

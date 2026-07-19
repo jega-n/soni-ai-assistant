@@ -2,6 +2,7 @@ from assistant.brain.prompts import SYSTEM_PROMPT
 import json
 
 
+
 class PromptBuilder:
 
     def __init__(self, memory_manager):
@@ -10,7 +11,8 @@ class PromptBuilder:
     def build(
         self,
         user_input: str,
-        tool_data=None
+        tool_data=None,
+        session_context=None
     ):
 
         messages = [
@@ -31,6 +33,19 @@ class PromptBuilder:
             messages.append({
                 "role": "system",
                 "content": f"{key}: {value}"
+            })
+
+        # Session Context
+        if session_context:
+
+            messages.append({
+                "role": "system",
+                "content": (
+                    "Current session context.\n"
+                    "Use it to resolve references like "
+                    "'it', 'that', 'them', 'the previous one'.\n\n"
+                    f"{json.dumps(session_context, indent=2, ensure_ascii=False)}"
+                )
             })
 
         # Tool Context
