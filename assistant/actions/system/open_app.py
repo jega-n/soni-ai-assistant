@@ -9,19 +9,11 @@ class OpenAppTool(BaseTool):
 
     name = "open_app"
 
-    description = "Open an installed desktop application."
-
     tool_type = ToolType.DETERMINISTIC
 
     parameters = {
         "application": "string"
     }
-
-    examples = [
-        "Open Notepad",
-        "Launch Calculator",
-        "Start Chrome"
-    ]
 
     APPS = APPLICATIONS
 
@@ -48,7 +40,7 @@ class OpenAppTool(BaseTool):
 
             return {
                 "success": True,
-                "response": "Opened application.",
+                "response": f"Opened {application}.",
                 "data": {
                     "application": application
                 }, 

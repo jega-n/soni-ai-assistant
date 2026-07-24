@@ -61,6 +61,11 @@ class WakeWordDetector:
                 print("Wake word detected!")
                 return True
 
+    def wait_for_enter(self):
+        while True:
+            if(input() == ""):
+                return
+
     def close(self):
         if self.stream:
             self.stream.stop()

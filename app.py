@@ -1,3 +1,4 @@
+import time
 import traceback
 
 from assistant.utils.logger import logger
@@ -50,12 +51,16 @@ class Assistant:
 
     def start(self):
 
+        start = time.perf_counter()
+
         logger.info(f"{self.name} v{self.version} started.")
 
         print("=" * 50)
         print(f"Welcome to {self.name}")
         print(f"Version : {self.version}")
         print("=" * 50)
+
+        print(f"start time: {time.perf_counter() - start:.2f} seconds")
 
     def shutdown(self):
 
@@ -79,10 +84,14 @@ class Assistant:
                 if user_input.lower() in ("exit", "quit"):
                     break
 
+                start = time.perf_counter()
+
                 response = self.engine.execute(
                     user_input=user_input,
                     plan=self.planner.plan(user_input)
                 )
+
+                print(f"Execution time: {time.perf_counter()-start:.2f}s")
 
                 print(f"Soni: {response}")
 

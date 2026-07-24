@@ -2,11 +2,13 @@ from assistant.brain.prompts import SYSTEM_PROMPT
 import json
 
 
-
 class PromptBuilder:
 
     def __init__(self, memory_manager):
+
         self.memory = memory_manager
+
+    # --------------------------------------------------
 
     def build(
         self,
@@ -28,9 +30,7 @@ class PromptBuilder:
         )
 
         # Semantic Memory
-        facts = self.memory.semantic.store.list_facts()
-
-        for fact in facts:
+        for fact in self.memory.semantic.store.list_facts():
 
             messages.append({
                 "role": "system",
@@ -44,25 +44,25 @@ class PromptBuilder:
                 "role": "system",
                 "content": (
                     "Current session context.\n"
-                    "Use it to resolve references like "
+                    "Use it to resolve references such as "
                     "'it', 'that', 'them', 'the previous one'.\n\n"
                     f"{json.dumps(session_context, indent=2, ensure_ascii=False)}"
                 )
             })
 
-        # Tool Context
+        # Tool Output
         if tool_data is not None:
 
             messages.append({
                 "role": "system",
                 "content": (
-                    "The following structured data was produced by a trusted Python tool.\n"
-                    "Treat this data as factual.\n\n"
+                    "The following structured data was produced by a trusted tool.\n"
+                    "Treat it as factual.\n\n"
                     f"{json.dumps(tool_data, indent=2, ensure_ascii=False)}"
                 )
             })
 
-        # Current User Message
+        # User
         messages.append({
             "role": "user",
             "content": user_input

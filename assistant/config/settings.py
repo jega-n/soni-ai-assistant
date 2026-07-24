@@ -75,9 +75,17 @@ OUTPUT_AUDIO = r"assets/temp/output.wav"
 # LLM Configuration
 # ==========================
 
-LLM_MODEL = "qwen2.5:3b"
+CHAT_MODEL = "qwen2.5:3b"
+
+PLANNER_MODEL = "qwen2.5:1.5b"
 
 OLLAMA_HOST = "http://localhost:11434"
+
+PLANNER_OPTIONS = {
+    "temperature": 0,
+    "top_p": 0.9,
+    "num_predict": 150
+}
 
 # ==========================
 # Application Configuration

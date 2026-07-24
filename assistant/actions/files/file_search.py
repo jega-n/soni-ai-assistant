@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from pathlib import Path
 
 from assistant.actions.base_tool import BaseTool, ToolType
@@ -8,29 +7,22 @@ from assistant.config.settings import (
     MAX_SEARCH_RESULTS,
     IGNORED_DIRECTORIES,
 )
-
 from assistant.utils.platform import PlatformManager
+
 SEARCH_DIRECTORIES = PlatformManager.get_search_directories()
+
 
 class FileSearchTool(BaseTool):
 
     name = "file_search"
 
-    description = "Search local files by filename."
+    planner_visible = True
 
     tool_type = ToolType.REASONING
 
     parameters = {
         "query": "string"
     }
-
-    examples = [
-        "Find my resume",
-        "Search README",
-        "Find report.pdf",
-        "Find Python files",
-        "Search invoice"
-    ]
 
     def execute(
         self,
@@ -41,16 +33,14 @@ class FileSearchTool(BaseTool):
 
         query = Path(query).stem.lower().strip()
 
-        # Convert extension alias to actual extensions
         allowed_extensions = None
 
         if extension:
             extension = extension.lower().lstrip(".")
 
-            if extension in EXTENSION_MAP:
-                allowed_extensions = EXTENSION_MAP[extension]
-            else:
-                allowed_extensions = ["." + extension]
+            allowed_extensions = (
+                EXTENSION_MAP.get(extension, ["." + extension])
+            )
 
         results = []
 
@@ -61,7 +51,6 @@ class FileSearchTool(BaseTool):
 
             for root, dirs, files in os.walk(search_directory):
 
-                # Skip ignored folders
                 dirs[:] = [
                     d for d in dirs
                     if d not in IGNORED_DIRECTORIES
@@ -73,7 +62,6 @@ class FileSearchTool(BaseTool):
 
                     suffix = filepath.suffix.lower()
 
-                    # Filter by extension if requested
                     if (
                         allowed_extensions is not None
                         and suffix not in allowed_extensions
@@ -86,18 +74,16 @@ class FileSearchTool(BaseTool):
                         continue
 
                     try:
+
                         stat = filepath.stat()
 
-                        # ---------- Relevance Score ----------
                         score = 0
 
                         if name == query:
                             score += 100
-
                         elif name.startswith(query):
                             score += 80
-
-                        elif query in name:
+                        else:
                             score += 50
 
                         if suffix in {
@@ -108,32 +94,20 @@ class FileSearchTool(BaseTool):
                         }:
                             score += 10
 
-                        modified = stat.st_mtime
-
                         results.append({
                             "name": filepath.name,
                             "path": str(filepath),
                             "extension": suffix,
                             "size": stat.st_size,
-                            "modified": modified,
+                            "modified": stat.st_mtime,
                             "score": score,
                         })
-
-                        # Stop searching after collecting enough matches
-                        if len(results) >= MAX_SEARCH_RESULTS:
-                            break
 
                     except OSError:
                         continue
 
-                if len(results) >= MAX_SEARCH_RESULTS:
-                    break
-
-            if len(results) >= MAX_SEARCH_RESULTS:
-                break
-
-        # No matches
         if not results:
+
             return {
                 "success": False,
                 "response": "I couldn't find that file.",
@@ -141,20 +115,19 @@ class FileSearchTool(BaseTool):
                 "llm": False
             }
 
-        # Best match first
         results.sort(
             key=lambda x: (
                 x["score"],
-                x["modified"],
+                x["modified"]
             ),
-            reverse=True,
+            reverse=True
         )
 
         best = results[0]
 
         return {
             "success": True,
-            "response": None,
+            "response": f"I found '{best['name']}' in '{best['path']}'.",
             "data": best,
             "llm": False
         }

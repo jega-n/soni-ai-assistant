@@ -10,21 +10,11 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 class BrowserSearchTool(BaseTool):
     name = "browser_search"
 
-    description = "Search the web and return structured search results."
-
     tool_type = ToolType.REASONING
 
     parameters = {
         "query": "string"
     }
-
-    examples = [
-        "Search latest AI news",
-        "Search Python tutorials",
-        "Find OpenAI website",
-        "Search weather in Chennai",
-        "Look up machine learning"
-    ]
 
     def execute(self, query: str, **kwargs):
 

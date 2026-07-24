@@ -11,6 +11,7 @@ class BaseTool(ABC):
     name = ""
     description = ""
     tool_type = ToolType.DETERMINISTIC
+    planner_visible = True
 
     @abstractmethod
     def execute(self, **kwargs):

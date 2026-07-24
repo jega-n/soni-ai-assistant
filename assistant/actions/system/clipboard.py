@@ -7,17 +7,10 @@ class ClipboardTool(BaseTool):
 
     name = "clipboard"
 
-    description = "Read or copy text from/to system clipboard."
-
     parameters = {
         "action": "read | copy",
         "text": "string (required for copy)"
     }
-
-    examples = [
-        "Read my clipboard",
-        "Copy this text to clipboard"
-    ]
 
     tool_type = ToolType.DETERMINISTIC
 
@@ -36,7 +29,7 @@ class ClipboardTool(BaseTool):
                     "data": {
                         "clipboard_text": content
                     },
-                    "llm": False
+                    "llm": True
                 }
 
 

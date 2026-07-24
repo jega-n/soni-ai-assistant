@@ -7,21 +7,13 @@ class OpenFileTool(BaseTool):
 
     name = "open_file"
 
-    description = "Open a local file using its default application."
-
     tool_type = ToolType.DETERMINISTIC
 
-    parameters = {
-        "path": "string"
-    }
+    planner_visible = False
 
-    examples = [
-        "Open resume.pdf",
-        "Open README.md",
-        "Open report.docx",
-        "Open notes.txt",
-        "Open presentation.pptx"
-    ]
+    parameters = {
+        "query": "string"
+    }
 
     def execute(
         self,

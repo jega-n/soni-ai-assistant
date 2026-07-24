@@ -1,3 +1,4 @@
+import time
 from assistant.actions.tool_executor import ToolExecutor
 from assistant.brain.execution_plan import ExecutionPlan, ExecutionStep
 from assistant.brain.llm import LLM
@@ -19,15 +20,23 @@ class ExecutionEngine:
     def execute(self, user_input: str, plan: ExecutionPlan):
 
         # No tool selected -> chat directly with LLM
+        print(plan)
+
         if not plan.steps:
 
-            prompt = self.prompt_builder.build(
+            start = time.perf_counter()
+
+            msg = self.prompt_builder.build(
                 user_input=user_input,
                 tool_data=None,
                 session_context=self.session.all()
             )
 
-            response = self.llm.generate(prompt)
+            start = time.perf_counter()
+
+            response = self.llm.chat(msg)
+
+            print(f"Chat responds in:{time.perf_counter() - start} seconds")
 
             self.memory.add_interaction(
                 user=user_input,
@@ -41,10 +50,14 @@ class ExecutionEngine:
         # Execute each step in order
         for step in plan.steps:
 
+            start = time.perf_counter()
+
             result = self.executor.execute(
                 step.tool,
                 **step.parameters
             )
+
+            print(f"Tool executed in: {time.perf_counter() - start} seconds")
 
             self._update_session(
                 user_input=user_input,
@@ -96,13 +109,13 @@ class ExecutionEngine:
             return response
 
         # Tool requires LLM
-        prompt = self.prompt_builder.build(
+        msg = self.prompt_builder.build(
             user_input=user_input,
             tool_data=result["data"],
             session_context=self.session.all()
         )
 
-        response = self.llm.generate(prompt)
+        response = self.llm.chat(msg)
 
         self.session.set("last_response", response)
 
@@ -115,13 +128,21 @@ class ExecutionEngine:
         if step.tool != "open_app":
             return None
 
+        query = (
+            step.parameters.get("application")
+            or step.parameters.get("query")
+        )
+
+        if not query:
+            return None
+
         search = self.executor.execute(
             "file_search",
-            query=step.parameters["application"]
+            query=query
         )
 
         if not search["success"]:
-            return None
+            return search["response"]
 
         data = search["result"]["data"]
 

@@ -1,42 +1,42 @@
 from pathlib import Path
 
 from assistant.actions.base_tool import BaseTool, ToolType
+from assistant.actions.files.file_search import FileSearchTool
 from assistant.config.settings import SUPPORTED_TEXT_FILES
 
 
 class FileReaderTool(BaseTool):
 
-    name = "file_reader"
-    description = "Read text files."
+    name = "read_file"
+
+    planner_visible = True
+
     tool_type = ToolType.REASONING
+
     parameters = {
-        "application": "string"
+        "query": "string"
     }
 
-    examples = [
-        "Open Notepad",
-        "Launch Calculator",
-        "Start Chrome"
-    ]
+    def __init__(self):
+        self.search_tool = FileSearchTool()
 
-    def execute(self, path: str, **kwargs):
+    def execute(self, query: str, **kwargs):
+
+        search = self.search_tool.execute(query=query)
+
+        if not search["success"]:
+            return search
+
+        path = search["data"]["path"]
 
         file = Path(path)
-
-        if not file.exists():
-            return {
-                "success": False,
-                "response": "File not found.",
-                "data": None,
-                "llm": True
-            }
 
         if file.suffix.lower() not in SUPPORTED_TEXT_FILES:
             return {
                 "success": False,
-                "response": f"{file.suffix} is not supported yet.",
+                "response": f"{file.suffix} files are not supported yet.",
                 "data": None,
-                "llm": True
+                "llm": False
             }
 
         try:
@@ -63,5 +63,5 @@ class FileReaderTool(BaseTool):
                 "success": False,
                 "response": str(e),
                 "data": None,
-                "llm": True
+                "llm": False
             }

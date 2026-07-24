@@ -7,20 +7,11 @@ class ProcessManagerTool(BaseTool):
 
     name = "process_manager"
 
-    description = "List running processes and terminate processes."
-
     parameters = {
         "action": "list | terminate",
         "name": "string (optional)",
         "pid": "integer (optional)"
     }
-
-    examples = [
-        "Show running applications",
-        "List running processes",
-        "Close Notepad",
-        "Terminate process 1234"
-    ]
 
     tool_type = ToolType.DETERMINISTIC
 
@@ -58,7 +49,7 @@ class ProcessManagerTool(BaseTool):
                     "data": {
                         "processes": processes
                     },
-                    "llm": False
+                    "llm": True
                 }
 
 

@@ -12,7 +12,6 @@ class VoiceLoop:
     def __init__(self):
 
         self.wake = WakeWordDetector()
-
         self.recorder = Recorder()
         self.transcriber = Transcriber()
         self.speaker = Speaker()
@@ -21,7 +20,8 @@ class VoiceLoop:
 
     def wait_for_command(self):
 
-        self.wake.wait()
+        # self.wake.wait()
+        self.wake.wait_for_enter()
 
         return self.listen()
 

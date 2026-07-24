@@ -24,13 +24,8 @@ class ToolRegistry:
         return list(self._tools.keys())
 
     def planner_tools(self):
-
         return [
-            {
-                "name": tool.name,
-                "description": tool.description,
-                "parameters": tool.parameters,
-                "examples": tool.examples,
-            }
+            f"{tool.name}({', '.join(tool.parameters.keys())})"
             for tool in self._tools.values()
+            if tool.planner_visible
         ]

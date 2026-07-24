@@ -1,5 +1,5 @@
 import psutil
-
+from datetime import datetime
 from assistant.actions.base_tool import BaseTool, ToolType
 
 
@@ -7,19 +7,9 @@ class SystemInfoTool(BaseTool):
 
     name = "system_info"
 
-    description = "Retrieve CPU, memory, disk and battery information."
-
     parameters = {
-        "metric": "cpu | memory | disk | battery | all"
+        "metric": "cpu | memory | disk | battery | time | date | datetime | all"
     }
-
-    examples = [
-        "What is my CPU usage?",
-        "How much RAM is used?",
-        "Show disk usage",
-        "Battery percentage",
-        "Show system information"
-    ]
 
     tool_type = ToolType.DETERMINISTIC
 
@@ -74,7 +64,34 @@ class SystemInfoTool(BaseTool):
                     "seconds_left": battery.secsleft
                 }
 
+            elif metric == "time":
+
+                now = datetime.now()
+
+                data = {
+                    "time": now.strftime("%I:%M:%S %p")
+                }
+
+            elif metric == "date":
+
+                now = datetime.now()
+
+                data = {
+                    "date": now.strftime("%A, %d %B %Y")
+                }
+
+            elif metric == "datetime":
+
+                now = datetime.now()
+
+                data = {
+                    "date": now.strftime("%A, %d %B %Y"),
+                    "time": now.strftime("%I:%M:%S %p")
+                }
+
             elif metric == "all":
+
+                now = datetime.now()
 
                 memory = psutil.virtual_memory()
                 disk = psutil.disk_usage("/")
@@ -101,7 +118,10 @@ class SystemInfoTool(BaseTool):
                         "percent": battery.percent,
                         "power_plugged": battery.power_plugged,
                         "seconds_left": battery.secsleft
-                    }
+                    },
+
+                    "date": now.strftime("%A, %d %B %Y"),
+                    "time": now.strftime("%I:%M:%S %p")
                 }
 
             else:
@@ -117,7 +137,7 @@ class SystemInfoTool(BaseTool):
                 "success": True,
                 "response": None,
                 "data": data,
-                "llm": False
+                "llm": True
             }
 
         except Exception as e:

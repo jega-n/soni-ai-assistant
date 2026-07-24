@@ -1,5 +1,3 @@
-
-
 from assistant.actions.base_tool import BaseTool, ToolType
 from assistant.database.task_store import TaskStore
 
@@ -8,21 +6,12 @@ class SchedulerTool(BaseTool):
 
     name = "scheduler"
 
-    description = "Create, list and manage reminders and todo tasks."
-
     parameters = {
         "action": "create_reminder | create_todo | list | delete",
         "title": "string",
         "time": "string (optional)",
         "task_id": "integer (optional)"
     }
-
-    examples = [
-        "Remind me at 5 PM to call John",
-        "Create a todo to study NLP",
-        "Show my tasks",
-        "Delete task 2"
-    ]
 
     tool_type = ToolType.DETERMINISTIC
 
@@ -40,17 +29,19 @@ class SchedulerTool(BaseTool):
 
             if action == "create_reminder":
 
-                if not title:
+                if time is None:
                     return {
                         "success": False,
-                        "response": "Reminder title is required.",
+                        "response": "Reminder time is required.",
                         "data": None,
                         "llm": False
                     }
 
-                task_id = self._store.create_task(
+                reminder_title = "reminder" if title is None else title
+
+                new_task_id = self._store.create_task(
                     task_type="reminder",
-                    title=title,
+                    title=reminder_title,
                     time=time
                 )
 
@@ -58,42 +49,38 @@ class SchedulerTool(BaseTool):
                     "success": True,
                     "response": "Reminder created successfully.",
                     "data": {
-                        "task_id": task_id
+                        "task_id": new_task_id
                     },
                     "llm": False
                 }
 
             elif action == "create_todo":
 
-                if not title:
-                    return {
-                        "success": False,
-                        "response": "Todo title is required.",
-                        "data": None,
-                        "llm": False
-                    }
+                todo_title = "todo" if title is None else title
 
-                task_id = self._store.create_task(
+                new_task_id = self._store.create_task(
                     task_type="todo",
-                    title=title
+                    title=todo_title
                 )
 
                 return {
                     "success": True,
                     "response": "Todo created successfully.",
                     "data": {
-                        "task_id": task_id
+                        "task_id": new_task_id
                     },
                     "llm": False
                 }
 
             elif action == "list":
 
+                tasks = self._store.list_tasks()
+
                 return {
                     "success": True,
                     "response": None,
                     "data": {
-                        "tasks": self._store.list_tasks()
+                        "tasks": tasks
                     },
                     "llm": False
                 }
@@ -111,7 +98,6 @@ class SchedulerTool(BaseTool):
                 deleted = self._store.delete_task(task_id)
 
                 if not deleted:
-
                     return {
                         "success": False,
                         "response": "Task not found.",

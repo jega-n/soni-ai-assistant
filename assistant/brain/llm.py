@@ -1,48 +1,38 @@
-import os
 import ollama
-from assistant.brain.prompt_builder import PromptBuilder
-from assistant.memory.memory_manager import MemoryManager
-from assistant.utils.logger import logger
-from assistant.config.settings import LLM_MODEL
+
+from assistant.config.settings import (
+    CHAT_MODEL,
+    PLANNER_MODEL,
+    PLANNER_OPTIONS
+)
+
 
 class LLM:
 
     def __init__(self):
 
-        self.model = LLM_MODEL
+        self.chat_model = CHAT_MODEL
+        self.planner_model = CHAT_MODEL
 
-        self.memory = MemoryManager()
+    # --------------------------------------------------
 
-        self.prompt_builder = PromptBuilder(self.memory)
-
-    def generate(self, user_input: str, tool_result=None):
-
-        self.memory.working.add(
-            "user",
-            user_input
-        )
-
-        logger.info(f"User '{user_input}' added to working memory.")
-
-        messages = self.prompt_builder.build(
-            user_input=user_input,
-            tool_data=tool_result
-        )
-
-        logger.info("Prompt built successfully.")
+    def chat(self, messages: list[dict]) -> str:
 
         response = ollama.chat(
-            model=self.model,
+            model=self.chat_model,
             messages=messages
         )
 
-        answer = response["message"]["content"].strip()
+        return response["message"]["content"].strip()
 
-        self.memory.working.add(
-            "assistant",
-            answer
+    # --------------------------------------------------
+
+    def plan(self, messages: list[dict]) -> str:
+
+        response = ollama.chat(
+            model=self.planner_model,
+            messages=messages,
+            options=PLANNER_OPTIONS
         )
 
-        logger.info(f"Assistant '{answer}' added to working memory.")
-
-        return answer
+        return response["message"]["content"].strip()

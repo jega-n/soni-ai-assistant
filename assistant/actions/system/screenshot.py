@@ -10,14 +10,8 @@ class ScreenshotTool(BaseTool):
 
     name = "take_screenshot"
 
-    description = "Capture the current screen."
-
     parameters = {}
 
-    examples = [
-        "Take a screenshot",
-        "Capture screen"
-    ]
 
     tool_type = ToolType.DETERMINISTIC
 
