@@ -1,29 +1,16 @@
-from assistant.database.conversation_store import ConversationStore
-
-
 class WorkingMemory:
 
     def __init__(self, limit=10):
-
         self.limit = limit
-        self.store = ConversationStore()
-
+        self.messages = []
 
     def add(self, role, content):
-
-        self.store.save_message(
-            role,
-            content
-        )
-
+        self.messages.append({"role": role, "content": content})
+        while len(self.messages) > self.limit:
+            self.messages.pop(0)
 
     def get(self):
-
-        return self.store.get_recent_messages(
-            self.limit
-        )
-
+        return list(self.messages)
 
     def clear(self):
-
-        self.store.clear()
+        self.messages.clear()
