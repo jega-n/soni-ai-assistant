@@ -30,11 +30,17 @@ class PromptBuilder:
         )
 
         # Semantic Memory
-        for fact in self.memory.semantic.store.list_facts():
+        facts = self.memory.semantic.all()
 
+        if facts:
+            memory_lines = [f"{fact['key']}: {fact['value']}" for fact in facts]
             messages.append({
                 "role": "system",
-                "content": f"{fact['key']}: {fact['value']}"
+                "content": (
+                    "The following facts are long-term memory. "
+                    "Use them only when they are directly relevant to the user's request.\n\n"
+                    + "\n".join(memory_lines)
+                )
             })
 
         # Session Context
