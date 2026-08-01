@@ -10,6 +10,11 @@ LOG_DIR.mkdir(parents=True, exist_ok=True)
 class BrowserSearchTool(BaseTool):
     name = "browser_search"
 
+    description = (
+        "Opens a web browser and searches the internet for the given query. "
+        "Use only for information from the web, never for local files."
+    )
+
     tool_type = ToolType.REASONING
 
     parameters = {

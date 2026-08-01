@@ -10,6 +10,8 @@ class ScreenshotTool(BaseTool):
 
     name = "take_screenshot"
 
+    description = "Captures the current screen and saves it as an image file. Takes no parameters."
+
     parameters = {}
 
 

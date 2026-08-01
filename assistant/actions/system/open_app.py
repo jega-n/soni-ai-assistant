@@ -9,6 +9,11 @@ class OpenAppTool(BaseTool):
 
     name = "open_app"
 
+    description = (
+        "Launches a desktop application by name, e.g. calculator, notepad, paint. "
+        "Use only to open or start an app, never to close, kill, or terminate one."
+    )
+
     tool_type = ToolType.DETERMINISTIC
 
     parameters = {

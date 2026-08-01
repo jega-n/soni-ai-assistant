@@ -16,6 +16,11 @@ class FileSearchTool(BaseTool):
 
     name = "file_search"
 
+    description = (
+        "Searches the local filesystem for files matching a name or keyword and "
+        "returns matching file paths. Does not open or read the file's contents."
+    )
+
     planner_visible = True
 
     tool_type = ToolType.REASONING

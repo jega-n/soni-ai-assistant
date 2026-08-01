@@ -6,6 +6,12 @@ class SchedulerTool(BaseTool):
 
     name = "scheduler"
 
+    description = (
+        "Creates a time-based reminder (create_reminder), creates a to-do item "
+        "with no fixed time (create_todo), lists scheduled tasks, or deletes a "
+        "task by its task_id."
+    )
+
     parameters = {
         "action": "create_reminder | create_todo | list | delete",
         "title": "string",
@@ -54,7 +60,7 @@ class SchedulerTool(BaseTool):
                     "llm": False
                 }
 
-            elif action == "create_todo":
+            elif action == "create_todo" or action == "create":
 
                 todo_title = "todo" if title is None else title
 

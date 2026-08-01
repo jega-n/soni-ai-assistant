@@ -1,11 +1,19 @@
+import os
 import psutil
 from datetime import datetime
+
 from assistant.actions.base_tool import BaseTool, ToolType
 
 
 class SystemInfoTool(BaseTool):
 
     name = "system_info"
+
+    description = (
+        "Reports a live system metric: CPU usage, memory usage, disk usage, "
+        "battery status, the current time, the current date, or all of them together. "
+        "Use this for any question about system stats or what time/date it is right now."
+    )
 
     parameters = {
         "metric": "cpu | memory | disk | battery | time | date | datetime | all"
@@ -23,7 +31,7 @@ class SystemInfoTool(BaseTool):
 
                 return {
                     "success": True,
-                    "response": f"Current CPU usage is {cpu}%.",
+                    "response": f"CPU usage is currently {cpu}%.",
                     "data": {
                         "cpu_percent": cpu
                     },
@@ -34,11 +42,14 @@ class SystemInfoTool(BaseTool):
 
                 memory = psutil.virtual_memory()
 
+                memory_used = memory.used // (1024 ** 3)
+                memory_total = memory.total // (1024 ** 3)
+
                 return {
                     "success": True,
                     "response": (
                         f"Memory usage is {memory.percent}%. "
-                        f"Available memory is {memory.available // (1024**3)} GB."
+                        f"Using {memory_used} of {memory_total} GB."
                     ),
                     "data": {
                         "memory_total": memory.total,
@@ -51,13 +62,20 @@ class SystemInfoTool(BaseTool):
 
             elif metric == "disk":
 
-                disk = psutil.disk_usage("/")
+                disk = psutil.disk_usage(
+                    os.environ.get("SystemDrive", "C:") + "\\"
+                )
+
+                disk_used = disk.used // (1024 ** 3)
+                disk_total = disk.total // (1024 ** 3)
+                disk_free = disk.free // (1024 ** 3)
 
                 return {
                     "success": True,
                     "response": (
                         f"Disk usage is {disk.percent}%. "
-                        f"Free space is {disk.free // (1024**3)} GB."
+                        f"{disk_used} of {disk_total} GB are in use, "
+                        f"with {disk_free} GB free."
                     ),
                     "data": {
                         "disk_total": disk.total,
@@ -81,12 +99,16 @@ class SystemInfoTool(BaseTool):
                         "llm": False
                     }
 
-                charging = "charging" if battery.power_plugged else "not charging"
+                charging = (
+                    "charging"
+                    if battery.power_plugged
+                    else "running on battery"
+                )
 
                 return {
                     "success": True,
                     "response": (
-                        f"Battery is at {battery.percent}% and is currently {charging}."
+                        f"Battery is at {battery.percent}% and is {charging}."
                     ),
                     "data": {
                         "battery_percent": battery.percent,
@@ -102,7 +124,7 @@ class SystemInfoTool(BaseTool):
 
                 return {
                     "success": True,
-                    "response": f"The current time is {now.strftime('%I:%M:%S %p')}.",
+                    "response": f"It's {now.strftime('%I:%M %p')}.",
                     "data": {
                         "time": now.strftime("%I:%M:%S %p")
                     },
@@ -115,7 +137,9 @@ class SystemInfoTool(BaseTool):
 
                 return {
                     "success": True,
-                    "response": f"Today is {now.strftime('%A, %d %B %Y')}.",
+                    "response": (
+                        f"Today is {now.strftime('%A, %d %B %Y')}."
+                    ),
                     "data": {
                         "date": now.strftime("%A, %d %B %Y")
                     },
@@ -129,8 +153,8 @@ class SystemInfoTool(BaseTool):
                 return {
                     "success": True,
                     "response": (
-                        f"Today is {now.strftime('%A, %d %B %Y')} and the current time is "
-                        f"{now.strftime('%I:%M:%S %p')}."
+                        f"Today is {now.strftime('%A, %d %B %Y')}. "
+                        f"It's {now.strftime('%I:%M %p')}."
                     ),
                     "data": {
                         "date": now.strftime("%A, %d %B %Y"),
@@ -143,49 +167,60 @@ class SystemInfoTool(BaseTool):
 
                 now = datetime.now()
 
-                memory = psutil.virtual_memory()
-                disk = psutil.disk_usage("/")
-                battery = psutil.sensors_battery()
                 cpu = psutil.cpu_percent(interval=1)
+                memory = psutil.virtual_memory()
+
+                disk = psutil.disk_usage(
+                    os.environ.get("SystemDrive", "C:") + "\\"
+                )
+
+                battery = psutil.sensors_battery()
 
                 data = {
                     "cpu_percent": cpu,
+
                     "memory": {
                         "total": memory.total,
                         "used": memory.used,
                         "available": memory.available,
                         "percent": memory.percent
                     },
+
                     "disk": {
                         "total": disk.total,
                         "used": disk.used,
                         "free": disk.free,
                         "percent": disk.percent
                     },
-                    "battery": None if battery is None else {
-                        "percent": battery.percent,
-                        "power_plugged": battery.power_plugged,
-                        "seconds_left": battery.secsleft
-                    },
+
+                    "battery": (
+                        None if battery is None else {
+                            "percent": battery.percent,
+                            "power_plugged": battery.power_plugged,
+                            "seconds_left": battery.secsleft
+                        }
+                    ),
+
                     "date": now.strftime("%A, %d %B %Y"),
                     "time": now.strftime("%I:%M:%S %p")
                 }
 
                 battery_text = (
-                    "Battery information unavailable."
+                    "Battery information isn't available."
                     if battery is None
-                    else f"Battery is {battery.percent}%."
+                    else f"Battery is at {battery.percent}%."
+                )
+
+                response = (
+                    f"CPU usage is {cpu}%, "
+                    f"memory usage is {memory.percent}%, "
+                    f"disk usage is {disk.percent}%. "
+                    f"{battery_text}"
                 )
 
                 return {
                     "success": True,
-                    "response": (
-                        f"CPU usage is {cpu}%. "
-                        f"Memory usage is {memory.percent}%. "
-                        f"Disk usage is {disk.percent}%. "
-                        f"{battery_text} "
-                        f"Today is {data['date']} and the current time is {data['time']}."
-                    ),
+                    "response": response,
                     "data": data,
                     "llm": False
                 }

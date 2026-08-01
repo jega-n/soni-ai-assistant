@@ -7,6 +7,12 @@ class ProcessManagerTool(BaseTool):
 
     name = "process_manager"
 
+    description = (
+        "Lists currently running processes, or closes/kills/terminates/stops a "
+        "running app or process by name or process ID. Use this any time the user "
+        "wants to close, kill, quit, terminate, or stop an application."
+    )
+
     parameters = {
         "action": "list | terminate",
         "name": "string (optional)",
@@ -43,32 +49,48 @@ class ProcessManagerTool(BaseTool):
                     ):
                         continue
 
+                process_count = len(processes)
+
+                preview = ", ".join(
+                    p["name"] for p in processes[:5] if p["name"]
+                )
+
+                response = (
+                    f"There are {process_count} running processes."
+                )
+
+                if preview:
+                    response += f" Some of them are: {preview}."
+
                 return {
                     "success": True,
-                    "response": None,
+                    "response": response,
                     "data": {
                         "processes": processes
                     },
-                    "llm": True
+                    "llm": False
                 }
-
 
             elif action == "terminate":
 
                 if pid is not None:
 
                     process = psutil.Process(pid)
+                    process_name = process.name()
                     process.terminate()
 
                     return {
                         "success": True,
-                        "response": f"Process {pid} terminated.",
+                        "response": (
+                            f"Terminated process '{process_name}' "
+                            f"with PID {pid}."
+                        ),
                         "data": {
-                            "pid": pid
+                            "pid": pid,
+                            "name": process_name
                         },
                         "llm": False
                     }
-
 
                 if name:
 
@@ -81,7 +103,7 @@ class ProcessManagerTool(BaseTool):
                         try:
 
                             process_name = process.info["name"]
-                            
+
                             if (
                                 process_name
                                 and name.lower() in process_name.lower()
@@ -91,7 +113,7 @@ class ProcessManagerTool(BaseTool):
 
                                 terminated.append({
                                     "pid": process.info["pid"],
-                                    "name": process.info["name"]
+                                    "name": process_name
                                 })
 
                         except (
@@ -104,28 +126,31 @@ class ProcessManagerTool(BaseTool):
 
                         return {
                             "success": False,
-                            "response": f"No running process named '{name}' found.",
+                            "response": (
+                                f"No running process named '{name}' found."
+                            ),
                             "data": None,
                             "llm": False
                         }
 
                     return {
                         "success": True,
-                        "response": f"Terminated {len(terminated)} process(es) named '{name}'.",
+                        "response": (
+                            f"Terminated {len(terminated)} process(es) "
+                            f"named '{name}'."
+                        ),
                         "data": {
                             "terminated": terminated
                         },
                         "llm": False
                     }
 
-
                 return {
                     "success": False,
-                    "response": "Provide either a process name or PID.",
+                    "response": "Provide either a process name or a PID.",
                     "data": None,
                     "llm": False
                 }
-
 
             return {
                 "success": False,
@@ -156,7 +181,7 @@ class ProcessManagerTool(BaseTool):
 
             return {
                 "success": False,
-                "response": str(e),
+                "response": f"Process manager failed: {str(e)}",
                 "data": None,
                 "llm": False
             }

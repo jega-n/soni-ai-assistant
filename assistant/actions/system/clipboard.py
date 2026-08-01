@@ -7,6 +7,8 @@ class ClipboardTool(BaseTool):
 
     name = "clipboard"
 
+    description = "Reads the current clipboard content, or copies given text onto the clipboard."
+
     parameters = {
         "action": "read | copy",
         "text": "string (required for copy)"

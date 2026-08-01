@@ -7,6 +7,8 @@ class OpenFileTool(BaseTool):
 
     name = "open_file"
 
+    description = "Opens a specific file at a known path using its default application."
+
     tool_type = ToolType.DETERMINISTIC
 
     planner_visible = False

@@ -9,6 +9,11 @@ class FileReaderTool(BaseTool):
 
     name = "read_file"
 
+    description = (
+        "Finds a file by name or keyword and reads back its text content. "
+        "Use when the user wants to know what is inside a file, not just find it."
+    )
+
     planner_visible = True
 
     tool_type = ToolType.REASONING

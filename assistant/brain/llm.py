@@ -32,7 +32,8 @@ class LLM:
         response = ollama.chat(
             model=self.planner_model,
             messages=messages,
-            options=PLANNER_OPTIONS
+            options=PLANNER_OPTIONS,
+            think=False
         )
 
         return response["message"]["content"].strip()
