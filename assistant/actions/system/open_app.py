@@ -12,14 +12,14 @@ class OpenAppTool(BaseTool):
     tool_type = ToolType.DETERMINISTIC
 
     parameters = {
-        "application": "string"
+        "query": "string"
     }
 
     APPS = APPLICATIONS
 
-    def execute(self, application: str, **kwargs):
+    def execute(self, query: str, **kwargs):
 
-        application = application.lower().strip()
+        application = query.lower().strip()
 
         if application in self.APPS:
 

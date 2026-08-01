@@ -14,7 +14,6 @@ class ClipboardTool(BaseTool):
 
     tool_type = ToolType.DETERMINISTIC
 
-
     def execute(self, action, text=None):
 
         try:
@@ -23,15 +22,24 @@ class ClipboardTool(BaseTool):
 
                 content = pyperclip.paste()
 
+                if not content.strip():
+                    return {
+                        "success": True,
+                        "response": "Your clipboard is empty.",
+                        "data": {
+                            "clipboard_text": ""
+                        },
+                        "llm": False
+                    }
+
                 return {
                     "success": True,
-                    "response": None,
+                    "response": f"Your clipboard contains: {content}",
                     "data": {
                         "clipboard_text": content
                     },
-                    "llm": True
+                    "llm": False
                 }
-
 
             elif action == "copy":
 
@@ -43,18 +51,16 @@ class ClipboardTool(BaseTool):
                         "llm": False
                     }
 
-
                 pyperclip.copy(text)
 
                 return {
                     "success": True,
-                    "response": "Text copied to clipboard.",
+                    "response": "Text copied to the clipboard.",
                     "data": {
                         "copied_text": text
                     },
                     "llm": False
                 }
-
 
             else:
 
@@ -64,7 +70,6 @@ class ClipboardTool(BaseTool):
                     "data": None,
                     "llm": False
                 }
-
 
         except Exception as e:
 
